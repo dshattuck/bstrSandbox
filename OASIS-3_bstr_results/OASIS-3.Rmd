@@ -1,0 +1,62 @@
+---
+title: "R Notebook to replicate OASIS dataset analysis in bstr"
+output: html_notebook
+---
+
+# Load bstr
+```{r load}
+library(bstr)
+```
+
+# Setup directories
+```{r setup}
+data_dir = "/bstr/OASIS-3_23b/"
+outdir_leading = "/bstr/OASIS-3/"
+test_csv = "/bstr/OASIS-3.csv"
+```
+
+# TBM correlation analysis with CDR
+```{r TBM_CDR}
+bstr_data <- load_bstr_data(type="tbm", subjdir = data_dir, csv = test_csv, smooth = 3)
+bstr_model <- bstr_corr(corr_var = "CDR", bstr_data = bstr_data)
+bstr_out <- save_bstr_out(bstr_data, bstr_model, outdir=paste0(outdir_leading,"/tbm_corr_CDR_smooth3"),overwrite = T)
+```
+
+# TBM correlation analysis with Age
+```{r TBM_Age}
+bstr_data <- load_bstr_data(type="tbm", subjdir = data_dir, csv = test_csv, smooth = 3)
+bstr_model <- bstr_corr(corr_var = "Age", bstr_data = bstr_data)
+bstr_out <- save_bstr_out(bstr_data, bstr_model, outdir=paste0(outdir_leading,"/tbm_corr_Age_smooth3"),overwrite = T)
+```
+
+# Surface based ANOVA analysis for MMSE controlling for Age and Sex
+```{r SBA_MMSE}
+bstr_data <- load_bstr_data(type="sba", subjdir = data_dir, csv = test_csv, hemi = "both", smooth=2)
+bstr_model <- bstr_anova(main_effect = "MMSE", covariates = "Age + M_F_code", bstr_data = bstr_data)
+save_bstr_out(bstr_data, bstr_model, outdir=paste0(outdir_leading,"/sba_anova_MMSE_smooth2"),overwrite = T)
+```
+
+## Surface based Unpaired T-test between participants with CDR_BIN=NC vs CDR_BIN=DEM
+```{r SBA_CDR_BIN}
+bstr_data <- load_bstr_data(type="sba", subjdir = data_dir, csv = test_csv, hemi = "both", smooth=2)
+bstr_model <- bstr_ttest(group_var = "CDR_BIN", bstr_data)
+save_bstr_out(bstr_data, bstr_model, outdir=paste0(outdir_leading,"/sba_unpaired_ttest_CDR_BIN"),overwrite = T)
+```
+
+## Region of interest analysis (Correlations with MMSE) Right Hemisphere
+```{r ROI_MMSE}
+bstr_data <- load_bstr_data(type="roi", subjdir = data_dir, csv=test_csv, roiids = c(322), roimeas="gmthickness")
+bstr_model <- bstr_corr(corr_var = "MMSE", bstr_data = bstr_data, group_var = 'CDR_BIN')
+save_bstr_out(bstr_data, bstr_model, outdir=paste0(outdir_leading,"/roi_corr_MMSE"),overwrite = T)
+```
+
+## Region of interest analysis (ANOVA for the main effect of CDR_BIN) for subjects with CDR_BIN=NC and CDR_BIN=DEM
+## controlling for Age for the Left Hemisphere
+```{r ROI_CDR_BIN}
+bstr_data <- load_bstr_data(type="roi", subjdir = data_dir, csv=test_csv, roiids = c(323), roimeas="gmthickness")
+bstr_data@demographics$CDR_BIN <- as.factor(bstr_data@demographics$CDR_BIN)
+bstr_model <- bstr_anova(main_effect = "CDR_BIN", covariates = "Age", bstr_data = bstr_data)
+save_bstr_out(bstr_data, bstr_model, outdir=paste0(outdir_leading,"/roi_anova_CDR_BIN"),overwrite = T)
+```
+
+
