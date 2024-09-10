@@ -1,0 +1,30 @@
+---
+title: "R Notebook to replicate Rockland dataset analysis in bstr"
+output: html_notebook
+---
+
+# Load bstr
+```{r load}
+library(bstr)
+```
+
+# Setup directories
+```{r setup}
+data_dir <- "/bstr/Rockland_BS_processed/"
+outdir_leading = "/bstr/Rockland"
+test_csv = "/bstr/Rockland.csv"
+```
+
+# Diffusion analysis -- Correlation of MD with age
+```{r DBA_MD}
+bstr_data <- load_bstr_data(type = "dba", subjdir = data_dir, csv = test_csv, smooth = 3, measure = "MD") 
+bstr_model <- bstr_corr(corr_var = "age", bstr_data =  bstr_data)
+save_bstr_out(bstr_data, bstr_model, outdir=paste0(outdir_leading,"/dba_corr_age_MD_smooth3"),overwrite = T)
+```
+
+# Diffusion analysis -- ANOVA of FA with age controlled for sex
+```{r DBA_FA}
+bstr_data <- load_bstr_data(type = "dba", subjdir = data_dir, csv = test_csv, smooth = 3, measure = "FA") 
+bstr_model <- bstr_anova(main_effect = "age", covariates = "gender", bstr_data = bstr_data)
+save_bstr_out(bstr_data, bstr_model, outdir=paste0(outdir_leading,"/dba_anova_age_FA_smooth3"),overwrite = T)
+```
