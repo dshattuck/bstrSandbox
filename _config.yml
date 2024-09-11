@@ -19,4 +19,4 @@ title: bstr Paper Data
 #   - vendor/gems/
 #   - vendor/ruby/
 
-exclude: ['*.nii.gz', '*.dfs']
+# exclude: ['*.nii.gz', '*.dfs']
