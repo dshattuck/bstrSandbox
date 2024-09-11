@@ -19,5 +19,4 @@ title: bstr Paper Data
 #   - vendor/gems/
 #   - vendor/ruby/
 
-exclude:
-   - OASIS-3_bstr_results/
+exclude: ['*.nii.gz', '*.dfs']
